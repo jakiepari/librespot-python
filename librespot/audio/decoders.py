@@ -18,8 +18,7 @@ class AudioQuality(enum.Enum):
         if audio_format in [
                 AudioFile.MP3_96,
                 AudioFile.OGG_VORBIS_96,
-                AudioFile.AAC_24_NORM,
-                AudioFile.MP4_128,  
+                AudioFile.AAC_24_NORM,=
         ]:
             return AudioQuality.NORMAL
         if audio_format in [
@@ -49,34 +48,34 @@ class AudioQuality(enum.Enum):
 
 
 class VorbisOnlyAudioQuality(AudioQualityPicker):
-    logger = logging.getLogger("Librespot:Player:PreferredAudioQuality")
+    logger = logging.getLogger("Librespot:Player:VorbisOnlyAudioQuality")
     preferred: AudioQuality
 
     def __init__(self, preferred: AudioQuality):
         self.preferred = preferred
 
     @staticmethod
-    def get_preferred_file(files: typing.List[Metadata.AudioFile], format: SuperAudioFormat):
+    def get_vorbis_file(files: typing.List[Metadata.AudioFile]):
         for file in files:
             if file.HasField("format") and SuperAudioFormat.get(
-                    file.format) == format:
+                    file.format) == SuperAudioFormat.VORBIS:
                 return file
         return None
 
     def get_file(self, files: typing.List[Metadata.AudioFile]):
         matches: typing.List[Metadata.AudioFile] = self.preferred.get_matches(
             files)
-        preferred_file: Metadata.AudioFile = self.get_preferred_file(
-            matches, SuperAudioFormat.VORBIS)  # Default to VORBIS
-        if preferred_file is None:
-            preferred_file = self.get_preferred_file(
-                files, SuperAudioFormat.MP4)  # Fallback to MP4
-            if preferred_file is not None:
+        vorbis: Metadata.AudioFile = VorbisOnlyAudioQuality.get_vorbis_file(
+            matches)
+        if vorbis is None:
+            vorbis: Metadata.AudioFile = VorbisOnlyAudioQuality.get_vorbis_file(
+                files)
+            if vorbis is not None:
                 self.logger.warning(
                     "Using {} because preferred {} couldn't be found.".format(
-                        Metadata.AudioFile.Format.Name(preferred_file.format),
+                        Metadata.AudioFile.Format.Name(vorbis.format),
                         self.preferred))
             else:
                 self.logger.fatal(
-                    "Couldn't find any preferred audio file, available: {}")
-        return preferred_file
+                    "Couldn't find any Vorbis file, available: {}")
+        return vorbis
