@@ -18,7 +18,7 @@ class AudioQuality(enum.Enum):
         if audio_format in [
                 AudioFile.MP3_96,
                 AudioFile.OGG_VORBIS_96,
-                AudioFile.AAC_24_NORM,=
+                AudioFile.AAC_24_NORM,
         ]:
             return AudioQuality.NORMAL
         if audio_format in [
